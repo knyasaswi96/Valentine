@@ -1,0 +1,123 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2865
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 const yesBtn = document.getElementById("yesBtn");\
+const noBtn = document.getElementById("noBtn");\
+const hint = document.getElementById("hint");\
+const actions = document.getElementById("actions");\
+\
+const result = document.getElementById("result");\
+const resultTitle = document.getElementById("resultTitle");\
+const resultText = document.getElementById("resultText");\
+const replayBtn = document.getElementById("replayBtn");\
+const confetti = document.getElementById("confetti");\
+\
+let noCount = 0;\
+let moved = false;\
+\
+function showResult(title, text, icon="\uc0\u55357 \u56477 ")\{\
+  result.classList.remove("hidden");\
+  resultTitle.textContent = title;\
+  resultText.textContent = text;\
+  document.getElementById("resultIcon").textContent = icon;\
+  document.getElementById("stage").classList.add("hidden");\
+\}\
+\
+function reset()\{\
+  noCount = 0;\
+  hint.textContent = "";\
+  result.classList.add("hidden");\
+  document.getElementById("stage").classList.remove("hidden");\
+  // reset "no" button positioning\
+  noBtn.style.position = "";\
+  noBtn.style.left = "";\
+  noBtn.style.top = "";\
+  moved = false;\
+  confetti.innerHTML = "";\
+\}\
+\
+function rand(min, max)\{\
+  return Math.random() * (max - min) + min;\
+\}\
+\
+function moveNoButton()\{\
+  const rect = actions.getBoundingClientRect();\
+\
+  // If buttons wrap on very small screens, keep movement subtle.\
+  const maxX = Math.max(0, rect.width - noBtn.offsetWidth - 18);\
+  const maxY = Math.max(0, rect.height - noBtn.offsetHeight - 18);\
+\
+  const x = Math.floor(rand(8, maxX));\
+  const y = Math.floor(rand(8, maxY));\
+\
+  noBtn.style.position = "absolute";\
+  noBtn.style.left = `$\{x\}px`;\
+  noBtn.style.top = `$\{y\}px`;\
+  moved = true;\
+\}\
+\
+function heartConfetti(durationMs = 1200)\{\
+  confetti.innerHTML = "";\
+  const emojis = ["\uc0\u55357 \u56470 ","\u55357 \u56472 ","\u55357 \u56477 ","\u55357 \u56471 ","\u55357 \u56478 ","\u55357 \u56469 "];\
+  const end = Date.now() + durationMs;\
+\
+  function spawn()\{\
+    const heart = document.createElement("div");\
+    heart.className = "heart";\
+    heart.textContent = emojis[Math.floor(Math.random() * emojis.length)];\
+\
+    const left = rand(0, 100);\
+    const size = rand(16, 26);\
+    const drift = rand(-25, 25);\
+    const spin = rand(0, 360);\
+    const dur = rand(0.9, 1.6);\
+\
+    heart.style.left = `$\{left\}vw`;\
+    heart.style.fontSize = `$\{size\}px`;\
+    heart.style.transform = `translateX($\{drift\}px) rotate($\{spin\}deg)`;\
+    heart.style.animationDuration = `$\{dur\}s`;\
+\
+    confetti.appendChild(heart);\
+\
+    // Remove when done\
+    setTimeout(() => heart.remove(), dur * 1000 + 300);\
+  \}\
+\
+  const timer = setInterval(() => \{\
+    spawn();\
+    spawn();\
+    if (Date.now() > end) clearInterval(timer);\
+  \}, 80);\
+\}\
+\
+yesBtn.addEventListener("click", () => \{\
+  heartConfetti(1400);\
+  showResult(\
+    "YAY \uc0\u55357 \u56472 ",\
+    "Okay it\'92s official \'97 Valentine\'92s locked in \uc0\u55357 \u56836 \\n\\nText me what time you\'92re free?",\
+    "\uc0\u55357 \u56470 "\
+  );\
+\});\
+\
+noBtn.addEventListener("click", () => \{\
+  noCount++;\
+\
+  if (noCount === 1) hint.textContent = "Are you sure? \uc0\u55357 \u56837 ";\
+  else if (noCount === 2) hint.textContent = "Final answer? \uc0\u55357 \u56384 ";\
+  else \{\
+    hint.textContent = "Okay but\'85 you\'92ll have to catch the No button now \uc0\u55357 \u56836 ";\
+    moveNoButton();\
+  \}\
+\});\
+\
+// Also move on hover (desktop), but only after they've tried "No" once\
+noBtn.addEventListener("mouseenter", () => \{\
+  if (noCount >= 1 && !moved) moveNoButton();\
+\});\
+\
+replayBtn.addEventListener("click", reset);\
+}
